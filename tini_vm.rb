@@ -77,9 +77,39 @@ class TinyVM
         second = @stack.pop
         @stack << block.call(second, top)
     end
+
 end
 
-program = [:push, 1, :push, 2, :add, :store, :x, :halt]
+def compile_line(line)
+    tokens = line.strip.split(/\s+/) # スペースなどで分割
+    if tokens[1] == '=' && tokens[3] == '+'
+        var = tokens[0].to_sym
+        left = tokens[2].to_i
+        right = tokens[4].to_i
+        return [:push, left, :push, right, :add, :store, var]
+    elsif tokens[0] == 'print'
+        return [:load, tokens[1].to_sym, :print]
+    else
+        raise "Unknown line: #{line}"
+    end
+end
+
+def compile(source)
+    lines = source.lines.map(&:strip).reject{ |l| l.empty? || l.start_with?('#') }
+    bytecode = lines.flat_map{ |line| compile_line(line) }
+    bytecode << :halt
+end
+
+# program = [:push, 1, :push, 2, :add, :store, :x, :halt]
+source = <<~SRC
+    # コメント
+    x = 1 + 2
+    print x
+SRC
+
+program = compile(source)
+
+print program # バイトコードを表示
 
 vm = TinyVM.new(program)
 vm.run
