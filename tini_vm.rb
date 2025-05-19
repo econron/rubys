@@ -1,7 +1,7 @@
 class TinyVM
     def initialize(bytecode)
         @bytecode = bytecode
-        @ip = 0 # インストラクションポインタ。もしくはプログラムカウンタとも。CPUが次に実行する命令のアドレスを指す。
+        @ip = 0 # インストラクションポインタ（もしくはプログラムカウンタとも。CPUが次に実行する命令のアドレスを指す。がIPの概念を用いてるイメージ。）
         @stack = [] # スタックマシンのスタック。
         @memory = {}
     end
@@ -39,7 +39,7 @@ class TinyVM
                 value = @stack.pop
                 @memory[name] = value
             when :load
-                name = fetch
+                name = @stack.pop
                 @stack << @memory[name]
             when :jmp
                 addr = fetch
@@ -88,7 +88,8 @@ def compile_line(line)
         right = tokens[4].to_i
         return [:push, left, :push, right, :add, :store, var]
     elsif tokens[0] == 'print'
-        return [:load, tokens[1].to_sym, :print]
+        var = tokens[1].to_sym
+        return [:push, var, :load, :print]
     else
         raise "Unknown line: #{line}"
     end
@@ -100,7 +101,7 @@ def compile(source)
     bytecode << :halt
 end
 
-# program = [:push, 1, :push, 2, :add, :store, :x, :halt]
+# program = [:push, 1, :push, 2, :add, :store, :x, :push, :x, :load, :print, :halt]
 source = <<~SRC
     # コメント
     x = 1 + 2
