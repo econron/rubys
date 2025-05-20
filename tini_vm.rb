@@ -101,16 +101,16 @@ def compile(source)
     bytecode << :halt
 end
 
-# program = [:push, 1, :push, 2, :add, :store, :x, :push, :x, :load, :print, :halt]
+# ir = [:push, 1, :push, 2, :add, :store, :x, :push, :x, :load, :print, :halt]
 source = <<~SRC
     # コメント
     x = 1 + 2
     print x
 SRC
 
-program = compile(source)
+ir = compile(source)
 
-print program # バイトコードを表示
+print ir # 中間表現を表示
 
-vm = TinyVM.new(program)
+vm = TinyVM.new(ir)
 vm.run
